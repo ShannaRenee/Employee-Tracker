@@ -1,0 +1,11 @@
+insert into role (title, salary, department_id) values ('Systems Administrator II', '65729.45', 5);
+insert into role (title, salary, department_id) values ('Project Manager', '100609.25', 2);
+insert into role (title, salary, department_id) values ('Graphic Designer', '97625.53', 4);
+insert into role (title, salary, department_id) values ('Marketing Manager', '99387.65', 3);
+insert into role (title, salary, department_id) values ('VP Accounting', '97361.89', 2);
+insert into role (title, salary, department_id) values ('IT Manager', '96460.34', 5);
+insert into role (title, salary, department_id) values ('Programmer Analyst II', '114331.23', 5);
+insert into role (title, salary, department_id) values ('Account Representative I', '66800.45', 2);
+insert into role (title, salary, department_id) values ('Analog Circuit Design manager', '81623.44', 5);
+insert into role (title, salary, department_id) values ('Sales Representative', '80208.76', 1);
+insert into role (title, salary, department_id) values ('Sales Manager', '98633.35', 1);
