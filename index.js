@@ -36,9 +36,17 @@ const departmentPrompt = [
     }
 ];
 
-
-// Array of department options
-let listOfDepartments = ['Sales', 'Accounting', 'Marketing', 'Customer Service', 'IT', 'HR']
+// Initializing an array of department options
+const listOfDepartments = []
+// Query to populate Departments array
+connection.query('SELECT name FROM department;', function(err, results) {
+    if (err) {
+        console.log(err)
+    }
+    for (i = 0; i < results.length; i++) {
+        listOfDepartments.push(results[i].name)
+    }
+});
 
 // Prompt to add a role
 const rolePrompt = [
@@ -61,10 +69,18 @@ const rolePrompt = [
 ];
 
 
-// Array of role options
-let listOfRoles = ['Systems Administrator II', 'Project Manager', 'Graphic Designer', 'Marketing Manager',
-'VP Accounting', 'IT Manager', 'Programmer Analyst II', 'Account Representative I', 'Analog Circuit Design manager',
-'Sales Representative', 'Sales Manager', 'engineer']
+// Initialize empty array of roles
+let listOfRoles = []
+// Query to populate roles array
+connection.query('SELECT title FROM role;', function(err, results) {
+    if (err) {
+        console.log(err)
+    }
+    for (i = 0; i < results.length; i++) {
+        listOfRoles.push(results[i].title);
+    }
+});
+
 
 // Prompt to add an employee
 const employeePrompt = [
@@ -93,11 +109,18 @@ const employeePrompt = [
 ];
 
 
-// Array of employees
-let employeeNames = ['Jolee Mc Menamin', 'Guy Hebblethwaite', 'Jesus Bloxsome', 'Byrle Pauli', 'Oliviero Berringer', 
-'Claudie Abotson', 'Kristoforo Windas', 'Sammy Ruff', 'Gaspar Abbatucci', 'Colman Sapp', 'Faith Shucksmith',
-'Dorree MacAlinden', 'Kylie Slee', 'Binnie Hayller', 'Josie Lebbon', 'Andrei Rigolle', 'Ferd Beekmann',
-'Ezra Carter', 'Gabrielle Sweynson', 'Tracey Budden']
+// Initialize empty array of employees
+const employeeNames = []
+// Query to populate employeeNames array
+connection.query('SELECT first_name, last_name FROM employee;', function(err, results) {
+    if (err) {
+        console.log(err)
+    }
+    for (i = 0; i < results.length; i++) {
+        let full_name = results[i].first_name.concat(' ', results[i].last_name);
+        employeeNames.push(full_name);
+    }
+});
 
 // Prompt to update an employee role
 const updateRole = [
@@ -166,9 +189,13 @@ function employees() {
 
 // Add a department
 function addDepartment() {
-    inquirer.prompt(departmentPrompt).then((userChoice) => {
+    inquirer
+    .prompt(departmentPrompt)
+    .then((userChoice) => {
         connection.query('INSERT INTO department (name) VALUES (?);', userChoice.department, function (err, results) {
-            listOfDepartments.push(userChoice.department);
+            if (err) {
+                console.log(err)
+            }
             console.log(`Added ${userChoice.department} to the database.`);
             init();
         })
@@ -177,15 +204,21 @@ function addDepartment() {
 
 // Add a role
 function addRole() {
-    inquirer.prompt(rolePrompt).then((userChoice) => {
-        // console.log(userChoice)
+    inquirer
+    .prompt(rolePrompt)
+    .then((userChoice) => {
+        // getting department id from database
         connection.query('SELECT id FROM department WHERE name = (?);', userChoice.department, function (err, results) {
-            // console.log(results)
-            var department_id = results[0].id;
+            if (err) {
+                console.log(err)
+            }
+            let department_id = results[0].id;
             connection.query('INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?);', [userChoice.role, userChoice.salary, department_id], function (err, results) {
-                // console.log(userChoice.role, userChoice.salary, department_id)
+                if (err) {
+                    console.log(err)
+                }
                 console.log(`Added ${userChoice.role} to the database.`);
-                // init();
+                init();
             })
         })
 
@@ -194,22 +227,40 @@ function addRole() {
 
 // Add an employee
 function addEmployee() {
-    inquirer.prompt(employeePrompt).then((userChoice) => {
+    inquirer
+    .prompt(employeePrompt)
+    .then((userChoice) => {
+        // getting role id from database
         connection.query('SELECT id FROM role WHERE title = (?);', userChoice.role, function(err, results) {
+            if (err) {
+                console.log(err)
+            }
            var role_id = results[0].id;
+           let first_name = userChoice.managerConfirm.split(' ')[0];
+        // getting manager id from database
+           connection.query('SELECT id FROM employee WHERE first_name = (?);', first_name, function(err, results) {
+               if (err) {
+                   console.log(err)
+                }
+                let manager_id = results[0].id;
+                connection.query('INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?);', 
+                [userChoice.first_name, userChoice.last_name, role_id, manager_id], function (err, results) {
+                    if (err) {
+                        console.log(err)
+                    }
+                    console.table(results);
+                    init();
+                })
+            })
         })
-        connection.query('SELECT id FROM employee WHERE ')
-        // console.log(userChoice)
-        // connection.query('INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?);', function (err, results) {
-        //     console.table();
-        //     init();
-        // })
     })
 }
 
 // Update employee role
 function updateEmployeeRole() {
-    inquirer.prompt(updateRole).then((userChoice) => {
+    inquirer
+    .prompt(updateRole)
+    .then((userChoice) => {
         connection.query('SELECT id FROM role WHERE title = (?);', userChoice.role, function(err, results) {
             let role_id = results[0].id;
             let first_name = userChoice.employeeName.split(' ')[0];
@@ -222,5 +273,5 @@ function updateEmployeeRole() {
 
 
 
-
 init();
+
