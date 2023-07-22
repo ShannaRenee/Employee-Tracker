@@ -141,7 +141,9 @@ const updateRole = [
 
 // Starts up inquirer and brings up list of actions
 function init() {
-    inquirer.prompt(actions).then((userChoice) => {
+    inquirer
+    .prompt(actions)
+    .then((userChoice) => {
         if (userChoice.selections === 'View all departments') {
             department();
         } else if (userChoice.selections === 'View all roles') {
@@ -166,14 +168,21 @@ function init() {
 // View all departments
 function department() {
     connection.query('SELECT * FROM department;', function (err, results) {
-        console.table(results);
+        if (err) {
+            console.log(err)
+        }
+        console.table(results)
         init();
+
     })
 }
 
 // View all roles
 function role() {
-    connection.query('SELECT * FROM role;', function (err, results) {
+    connection.query('SELECT * FROM role JOIN department ON role.id = department.id;', function (err, results) {
+        if (err) {
+            console.log(err)
+        }
         console.table(results);
         init();
     })
@@ -181,7 +190,11 @@ function role() {
 
 // View all employees
 function employees() {
-    connection.query('SELECT * FROM employee;', function (err, results) {
+    connection.query('SELECT * FROM employee INNER JOIN role ON employee.id = role.id INNER JOIN department ON role.id = department.id;',
+     function (err, results) {
+        if (err) {
+            console.log(err)
+        }
         console.table(results);
         init();
     })
@@ -248,7 +261,7 @@ function addEmployee() {
                     if (err) {
                         console.log(err)
                     }
-                    console.table(results);
+                    console.log('Employee added to database');
                     init();
                 })
             })
@@ -262,9 +275,16 @@ function updateEmployeeRole() {
     .prompt(updateRole)
     .then((userChoice) => {
         connection.query('SELECT id FROM role WHERE title = (?);', userChoice.role, function(err, results) {
+            if (err) {
+                console.log(err)
+            }
             let role_id = results[0].id;
             let first_name = userChoice.employeeName.split(' ')[0];
             connection.query('UPDATE employee SET role_id = (?) WHERE first_name = (?);', (role_id, first_name), function (err, results) {
+                if (err) {
+                    console.log(err)
+                }
+                console.log(`${first_name}'s role updated to ${userChoice.role} in the database.`);
                 init();
             })
         })
@@ -274,4 +294,3 @@ function updateEmployeeRole() {
 
 
 init();
-
