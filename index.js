@@ -280,7 +280,7 @@ function updateEmployeeRole() {
             }
             let role_id = results[0].id;
             let first_name = userChoice.employeeName.split(' ')[0];
-            connection.query('UPDATE employee SET role_id = (?) WHERE first_name = (?);', (role_id, first_name), function (err, results) {
+            connection.query('UPDATE employee SET role_id = (?) WHERE first_name = (?);', [role_id, first_name], function (err, results) {
                 if (err) {
                     console.log(err)
                 }
